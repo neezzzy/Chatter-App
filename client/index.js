@@ -7,7 +7,7 @@ const dom = {
   dashboardMessage: document.querySelector("h1"),
   feed: document.querySelector(".feed"),
   sendButton: document.querySelector(".send-button"),
-  dashboard: document.querySelector(".dashboard"),
+  dashboardList: document.querySelector(".dashboard-list"),
 };
 
 const user = {
@@ -17,15 +17,16 @@ const user = {
 
 const fetchRandomAvatar = () => {
   const size = Math.floor(Math.random() * 100) + 25;
-
   return `url(https://www.placecage.com/${size}/${size})`;
 };
 
-const addEntry = ({ user, message }, you) => {
+const addChatMessage = ({ user, message }, you) => {
   const entry = document.createElement("li");
   const date = new Date();
 
-  entry.classList = `message-entry${you ? " message-entry-own" : ""}`;
+  entry.classList = `${
+    you ? " message-display-left" : "message-display-right"
+  }`;
   entry.innerHTML = `
         <span class="avatar" style="background: ${
           user.avatar
@@ -38,29 +39,26 @@ const addEntry = ({ user, message }, you) => {
     `;
 
   dom.feed.appendChild(entry);
-
-  const xH = dom.feed.scrollHeight;
-  dom.feed.scrollTo(0, xH);
+  // scroll to the bottom of all chat messages
+  const xHeight = dom.feed.scrollHeight;
+  dom.feed.scrollTo(0, xHeight);
 };
 
 const addUserToDashboard = (user) => {
   const dashboardMessage = document.createElement("li");
-  const message = `${user.name} has joined the chat`;
-
   const avatar = `<span class="avatar" style="background: ${user.avatar}; background-size: contain;"></span>`;
 
-  dashboardMessage.classList = "user-is-online-message";
   dashboardMessage.innerHTML = `
-        <div class="dashboard-message-text">
+        <div class="dashboard-list-message-text">
             ${avatar}
-            ${message}
+            ${user.name}
         </div>
     `;
 
-  dom.dashboard.appendChild(dashboardMessage);
+  dom.dashboardList.appendChild(dashboardMessage);
 };
 
-const enterChannel = () => {
+const enterChat = () => {
   const avatar = fetchRandomAvatar();
   const name = dom.nameInput.value;
 
@@ -73,7 +71,7 @@ const enterChannel = () => {
   dom.inputAvatar.innerText = "";
   dom.inputAvatar.style.backgroundImage = avatar;
   dom.inputAvatar.style.backgroundSize = "contain";
-
+  // adding values to the user object
   user.name = name;
   user.avatar = avatar;
 
@@ -85,10 +83,13 @@ const enterChannel = () => {
   });
 };
 
-socket.on("user connected", (payload) => addUserToDashboard(payload));
+socket.on("user connected", (payload) => {
+  addUserToDashboard(payload);
+});
 
+// recipient receives the chat message and it displays for them
 socket.on("send message", (payload) => {
-  addEntry(payload);
+  addChatMessage(payload);
 });
 
 dom.joinButton.onclick = (e) => {
@@ -97,7 +98,7 @@ dom.joinButton.onclick = (e) => {
   if (!dom.nameInput.value) {
     dom.nameInput.parentElement.classList.add("error");
   } else {
-    enterChannel();
+    enterChat();
   }
 };
 
@@ -105,12 +106,16 @@ dom.sendButton.onclick = (e) => {
   e.preventDefault();
   const message = dom.nameInput.value;
 
-  socket.emit("send message", {
-    message,
-    user,
-  });
-
-  addEntry({ user, message }, true);
-  dom.nameInput.value = "";
-  e.target.value = "";
+  // original sender sends the chat message
+  if (message) {
+    socket.emit("send message", {
+      message,
+      user,
+    });
+    addChatMessage({ user, message }, true);
+    dom.nameInput.value = "";
+    e.target.value = "";
+  } else {
+    dom.nameInput.parentElement.classList.add("error");
+  }
 };

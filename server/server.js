@@ -2,19 +2,15 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
-const cors = require('cors')
-app.use(cors())
+const cors = require("cors");
+app.use(cors());
 app.use(express.static(__dirname + "/../client"));
 
 http.listen(3000);
 
-console.log("Server is listening on http://localhost:3000");
-
 const users = {};
 
 io.on("connection", (socket) => {
-  console.log("connected...");
-
   socket.on("user connected", (payload) => {
     users[socket.id] = {
       id: socket.id,
@@ -26,9 +22,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send message", (payload) => {
+    
     socket.broadcast.emit("send message", {
       user: payload.user,
-      message: payload.message
+      message: payload.message,
     });
   });
 });
