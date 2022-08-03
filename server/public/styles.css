@@ -103,19 +103,7 @@ h3 {
   font-weight: bold;
 }
 
-.join-button {
-  background: #3ba58a;
-  border: 0;
-  color: #fefefe;
-  font-weight: bold;
-  padding: 5px 20px;
-  border-radius: 3px;
-  cursor: pointer;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-
 .send-button {
-  display: none;
   background: #3ba58a;
   border: 0;
   color: #fefefe;
@@ -132,7 +120,7 @@ h3 {
 
 /* dashboard-list */
 
-.dashboard-list {
+.dashboard-container {
   flex: 1;
   height: 95vh;
   max-width: 200px;
@@ -227,3 +215,15 @@ h3 {
 .user-name {
   font-weight: bold;
 }
+
+
+.gradient-custom {
+  /* fallback for old browsers */
+  background: #6a11cb;
+  
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+  
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1))
+  }
