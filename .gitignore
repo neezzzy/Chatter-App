@@ -3,6 +3,7 @@ node_modules
 package-lock.json
 *.log
 *.gz
-
+*.env
+chat.drawio
 # ignore additional files using core.excludesFile
 # https://git-scm.com/docs/gitignore

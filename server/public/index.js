@@ -13,31 +13,31 @@ const dom = {
   dashboardList: document.querySelector(".dashboard-list"),
 };
 
-const addChatMessage = ({ user, message }, you) => {
-  const entry = document.createElement("li");
-  const date = new Date();
+const addMessage = ({ senderID, content, createdAt }, user) => {
+  const [{ username, avatar }] = user;
 
-  entry.classList = `${
+  const messageEntry = document.createElement("li");
+  const you = senderID === socket.id ? true : false;
+
+  messageEntry.classList = `${
     you ? " message-display-left" : "message-display-right"
   }`;
-  entry.innerHTML = `
-        <span class="avatar" style="background: ${
-          user.avatar
-        }; background-size: contain;"></span>
+  messageEntry.innerHTML = `
+        <span class="avatar" style="background: ${avatar}; background-size: contain;"></span>
         <div class="message-body">
-            <span class="user-name">${you ? "You" : user.name}</span>
-            <time>@ ${date.getHours()}:${date.getMinutes()}</time>
-            <p>${message}</p>
+            <span class="user-name">${you ? "You" : username}</span>
+            <time>@ ${createdAt}</time>
+            <p>${content}</p>
         </div>
     `;
 
-  dom.feed.appendChild(entry);
+  dom.feed.appendChild(messageEntry);
   // scroll to the bottom of all chat messages
   const xHeight = dom.feed.scrollHeight;
   dom.feed.scrollTo(0, xHeight);
 };
 
-const addUsersToDashboard = (users) => {
+const updateUsersDashboard = (users) => {
   dom.dashboardList.innerHTML = "";
   for (user of users) {
     const dashboardMessage = document.createElement("li");
@@ -60,18 +60,16 @@ socket.emit("typed username", { username });
 dom.sendButton.onclick = (e) => {
   e.preventDefault();
   const message = dom.messageInput.value;
-  // emit message to server
-  socket.emit("chatMessage", ({message}));
+  socket.emit("chatMessage", { message });
+  dom.messageInput.value = "";
+  dom.messageInput.focus();
 };
-
-socket.on("message", (message) => {
-  console.log(message);
+socket.on("message", ({ newMessage, user }) => {
+  addMessage(newMessage, user);
 });
-
-socket.on("new user joined", (users) => {
-  addUsersToDashboard(users);
+socket.on("new user joined", ({ users }) => {
+  updateUsersDashboard(users);
 });
-
-socket.on("user has left", (users) => {
-  addUsersToDashboard(users);
+socket.on("user has left", (updatedUsers) => {
+  updateUsersDashboard(updatedUsers);
 });
