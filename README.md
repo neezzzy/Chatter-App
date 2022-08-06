@@ -84,7 +84,7 @@ I have created this project to learn more about Socket IO and Express server fun
 ## Roadmap
 
 - [ ] Create Private Rooms
-- [ ] User is typing functionaity
+- [x] User is typing functionaity
 - [ ] Chat History
 - [ ] User authentication
 - [ ] UI upgrade

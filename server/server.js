@@ -81,7 +81,6 @@ io.on("connection", async (socket) => {
     // implement authentication here
     // if user already exists, find it and send it
     // if user doesn't exist, create it and send it
-
     io.emit("new user joined", { users });
 
     // client disconnects
@@ -96,6 +95,11 @@ io.on("connection", async (socket) => {
       const newMessage = await createNewMessage(socket, message);
       io.emit("message", { newMessage, user });
     });
+
+    socket.on("user typing", async function (userSocket) {
+      const user = await User.find({ id: userSocket });
+      const [{ username }] = user;
+      socket.broadcast.emit("user typing", username);
+    });
   });
 });
-

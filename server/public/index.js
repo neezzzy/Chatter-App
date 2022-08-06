@@ -11,6 +11,7 @@ const dom = {
   feed: document.querySelector(".feed"),
   sendButton: document.querySelector(".send-button"),
   dashboardList: document.querySelector(".dashboard-list"),
+  feedback: document.querySelector(".feedback"),
 };
 
 const addMessage = ({ senderID, content, createdAt }, user) => {
@@ -64,7 +65,9 @@ dom.sendButton.onclick = (e) => {
   dom.messageInput.value = "";
   dom.messageInput.focus();
 };
+
 socket.on("message", ({ newMessage, user }) => {
+  dom.feedback.innerHTML = "";
   addMessage(newMessage, user);
 });
 socket.on("new user joined", ({ users }) => {
@@ -72,4 +75,12 @@ socket.on("new user joined", ({ users }) => {
 });
 socket.on("user has left", (updatedUsers) => {
   updateUsersDashboard(updatedUsers);
+});
+
+dom.messageInput.addEventListener("keypress", () => {
+  socket.emit("user typing", socket.id);
+});
+
+socket.on("user typing", (username) => {
+  dom.feedback.innerHTML = "<p><em>" + username + " is typing...</em></p>";
 });
