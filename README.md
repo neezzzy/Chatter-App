@@ -1,14 +1,14 @@
 # Chatter-App
-<div id="top"></div>
-
 <!-- PROJECT LOGO -->
 <div align="center">
 <h1 align="center">Chatter App</h1>
-
   <p align="center">
     Realtime chat app built with Socket IO, Express, MongoDB and Mongoose.
   </p>
 </div>
+
+  ![My Image](/hero.jpg)
+![My Image](/hero-2.jpg)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -83,11 +83,11 @@ I have created this project to learn more about Socket IO and Express server fun
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Create Private Rooms
-- [x] User is typing functionaity
-- [ ] Chat History
-- [ ] User authentication
-- [ ] UI upgrade
+1. ✅️ User is typing functionaity
+2. ✅️ UI upgrade
+3. Create Private Rooms
+4. Chat History
+5. User authentication
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
