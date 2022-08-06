@@ -6,7 +6,7 @@
 <h1 align="center">Chatter App</h1>
 
   <p align="center">
-    Realtime chat app built with Socket IO and Express server.
+    Realtime chat app built with Socket IO, Express, MongoDB and Mongoose.
   </p>
 </div>
 
@@ -49,6 +49,7 @@ I have created this project to learn more about Socket IO and Express server fun
 
 * [Express.js] [https://expressjs.com/]
 * [Socket IO] [https://socket.io/]
+* [MongoDB] [https://www.mongodb.com/]
 * [Bootstrap.com] [https://getbootstrap.com/]
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -84,11 +85,11 @@ I have created this project to learn more about Socket IO and Express server fun
 
 - [ ] Create Private Rooms
 - [ ] User is typing functionaity
+- [ ] Chat History
+- [ ] User authentication
 - [ ] UI upgrade
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -106,16 +107,12 @@ Don't forget to give the project a star! Thanks again!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- CONTACT -->
 ## Contact
@@ -124,16 +121,12 @@ Project Link: [https://github.com/neezzzy/Chatter-App](https://github.com/neezzz
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
 * [Web Dev Simplified](https://www.youtube.com/c/WebDevSimplified)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
