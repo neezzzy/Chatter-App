@@ -1,19 +1,19 @@
 :root {
   --main-bg-color: hsl(0, 0%, 0%);
-  --surface : hsl(0, 0%, 7%);
+  --surface: hsl(0, 0%, 7%);
   --primary: hsl(267, 74%, 43%);
   --secondary: hsl(174, 97%, 43%);
-  --secondary-shade: #162037;
+  --secondary-shade: hsl(222, 43%, 15%);
   --off-white: hsl(0, 0%, 87%);
   --off-white-medium: hsl(0, 0%, 60%);
   --off-white-disabled: hsl(0, 0%, 38%);
   --on-secondary: hsl(174, 100%, 10%);
+  --on-error: hsl(0, 100%, 32%);
 }
 
 * {
   margin: 0;
   box-sizing: border-box;
-
 }
 
 html {
@@ -21,7 +21,7 @@ html {
 }
 
 body {
-background-color: var(--main-bg-color);
+  background-color: var(--main-bg-color);
 }
 
 ul {
@@ -59,6 +59,13 @@ h3 {
   text-align: center;
 }
 
+/* login screen */
+.error {
+  color: var(--on-error);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 /* message form */
 .chat-form-container {
   position: relative;
@@ -87,8 +94,16 @@ h3 {
 }
 
 .message-input.error {
-  background: hsl(0, 100%, 50%);
+  border: 1px solid var(--on-error);
+  animation: blinker 1s linear 1;
 }
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 .avatar {
   width: 40px;
   height: 40px;
@@ -118,7 +133,7 @@ h3 {
 }
 
 .send-button {
-  background: var(--secondary );
+  background: var(--secondary);
   border: 0;
   color: var(--on-secondary);
   font-weight: bold;
@@ -236,14 +251,12 @@ h3 {
   font-weight: bold;
 }
 
-
 /* main screen */
 
-.join-btn{
+.join-btn {
   background-color: var(--secondary);
   text-transform: uppercase;
   font-weight: bold;
-
 }
 .gradient-custom {
   background: var(--surface);
@@ -255,9 +268,9 @@ h3 {
   -moz-animation: chatter-logo 2s 0s ease infinite;
   -webkit-animation: chatter-logo 2s 0s ease infinite;
   -o-animation: chatter-logo 2s 0s ease infinite;
-
 }
 
+/* animation */
 @keyframes chatter-logo {
   0%,
   100% {

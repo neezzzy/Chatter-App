@@ -17,6 +17,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 http.listen(3000);
 
+let username = null;
+
+app.post("/", (req, res) => {
+  const usernameTyped = req.body.username;
+  username = usernameTyped;
+  res.send(username);
+});
+
 const fetchRandomAvatar = () => {
   const size = Math.floor(Math.random() * 100) + 25;
   return `url(${process.env.AVATAR_URL}${size}/${size})`;
@@ -71,35 +79,35 @@ async function deleteUser(socketId) {
   await User.deleteOne({ id: socketId });
 }
 
-connectDB().catch((err) => console.log(err));
+async function deleteMessages(senderID) {
+  await Message.deleteMany({ senderID: senderID });
+}
 
+connectDB().catch((err) => console.log(err));
 // run when clients connects
 io.on("connection", async (socket) => {
-  socket.on("typed username", async function ({ username }) {
-    await createUser(username, socket);
-    const users = await fetchAllUsers();
-    // implement authentication here
-    // if user already exists, find it and send it
-    // if user doesn't exist, create it and send it
-    io.emit("new user joined", { users });
+  await createUser(username, socket);
+  const users = await fetchAllUsers();
+  
+  io.emit("new user joined", { users });
 
-    // client disconnects
-    socket.on("disconnect", async function () {
-      await deleteUser(socket.id);
-      const updatedUsers = await fetchAllUsers();
-      io.emit("user has left", updatedUsers);
-    });
+  // client disconnects
+  socket.on("disconnect", async function () {
+    await deleteUser(socket.id);
+    await deleteMessages(socket.id);
+    const updatedUsers = await fetchAllUsers();
+    io.emit("user has left", updatedUsers);
+  });
 
-    socket.on("chatMessage", async function ({ message }) {
-      const user = await User.find({ id: socket.id });
-      const newMessage = await createNewMessage(socket, message);
-      io.emit("message", { newMessage, user });
-    });
+  socket.on("chatMessage", async function ({ message }) {
+    const user = await User.find({ id: socket.id });
+    const newMessage = await createNewMessage(socket, message);
+    io.emit("message", { newMessage, user });
+  });
 
-    socket.on("user typing", async function (userSocket) {
-      const user = await User.find({ id: userSocket });
-      const [{ username }] = user;
-      socket.broadcast.emit("user typing", username);
-    });
+  socket.on("user typing", async function (userSocket) {
+    const user = await User.find({ id: userSocket });
+    const [{ username }] = user;
+    socket.broadcast.emit("user typing", username);
   });
 });
