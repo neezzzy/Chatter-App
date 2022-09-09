@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('../partials/head'); %>
+    <title>Chatter App with Socket.IO</title>
+
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="dashboard-container">
+      <h3>Active Users:</h3>
+      <ul class="dashboard-list">
+
+      </ul>
+    </div>
+    <div class="chat">
+      <ul class="feed">
+
+      </ul>
+      <div>
+        <form class="chat-form-container d-flex " action="#">
+          <span class="feedback"></span>
+          <div class="message-input w-100">
+            <input type="text" class="message-input-field input" placeholder="Type your message..." />
+          </div>
+          <button class="send-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-send"
+              viewBox="0 0 16 16">
+              <path
+                d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+
+    const socket = io();
+
+    const dom = {
+      messageInput: document.querySelector(".input"),
+      inputAvatar: document.querySelector(".chat-form-container .avatar"),
+      dashboardMessage: document.querySelector("h1"),
+      feed: document.querySelector(".feed"),
+      sendButton: document.querySelector(".send-button"),
+      dashboardList: document.querySelector(".dashboard-list"),
+      feedback: document.querySelector(".feedback"),
+    };
+
+    const addMessage = ({ senderID, content, createdAt }, user) => {
+      const [{ username, avatar }] = user;
+
+      const messageEntry = document.createElement("li");
+      const you = senderID === socket.id ? true : false;
+
+      messageEntry.classList = `${you ? " message-display-left" : "message-display-right"
+        }`;
+      messageEntry.innerHTML = `
+        <span class="avatar" style="background: ${avatar}; background-size: contain;"></span>
+        <div class="message-body">
+            <span class="user-name">${you ? "You" : username}</span>
+            <time>@ ${createdAt}</time>
+            <p>${content}</p>
+        </div>
+    `;
+
+      dom.feed.appendChild(messageEntry);
+      // scroll to the bottom of all chat messages
+      const xHeight = dom.feed.scrollHeight;
+      dom.feed.scrollTo(0, xHeight);
+    };
+    const updateUsersDashboard = (user) => {
+      dom.dashboardList.innerHTML = "";
+      const dashboardMessage = document.createElement("li");
+      const avatar = `<span class="avatar" style="background: url(${user.avatar}); background-size: contain;"></span>`;
+
+      dashboardMessage.innerHTML = `
+        <div class="dashboard-list-message-text">
+         ${avatar}
+         ${user.username}
+        </div>
+    `;
+      dom.dashboardList.appendChild(dashboardMessage);
+    };
+
+    dom.sendButton.onclick = (e) => {
+      e.preventDefault();
+      const message = dom.messageInput.value;
+      if (!message) {
+        $(".input").fadeOut(500).fadeIn(500);
+
+      } else {
+        socket.emit("chatMessage", { message });
+        dom.messageInput.value = "";
+        dom.messageInput.focus();
+      }
+    };
+    socket.on("message", ({ newMessage, user }) => {
+      dom.feedback.innerHTML = "";
+      addMessage(newMessage, user);
+    });
+
+    socket.on("new user joined", (currentUser) => {
+      console.log(currentUser)
+      updateUsersDashboard(currentUser);
+    });
+    socket.on("user has left", (updatedUsers) => {
+      updateUsersDashboard(updatedUsers);
+    });
+
+    dom.messageInput.addEventListener("keypress", () => {
+      socket.emit("user typing", socket.id);
+    });
+
+    socket.on("user typing", (username) => {
+      dom.feedback.innerHTML = "<p><em>" + username + " is typing...</em></p>";
+    });
+
+  </script>
+</body>
+
+</html>
