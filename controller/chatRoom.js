@@ -2,7 +2,7 @@
 import ChatRoomModel from '../models/ChatRoom.js';
 
 export default {
-  initiate: async (req, res, next) => {
+  initiate: async (req, res) => {
     try {
       const userId = req.userId;
       const { roomName } = req.body;
@@ -16,8 +16,9 @@ export default {
       if (room) {
         await ChatRoomModel.addNewUserToRoom(userId, room);
       }
-
+      
       return res.redirect(`/chat/${roomName}`);
+      
     } catch (error) {
       console.log(error.message);
     }

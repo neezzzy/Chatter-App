@@ -12,6 +12,15 @@ export default {
     }
   },
 
+  onGetUsersById: async (ids) => {
+    try {
+      const users = await UserModel.getUsersByIds(ids);
+      return users;
+    } catch (error) {
+      return console.log(error.message);
+    }
+  },
+
   onGetAllUsers: async (req, res) => {
     try {
       const users = await UserModel.getUsers();
@@ -27,7 +36,7 @@ export default {
       const hashedPassword = await bcrypt.hash(password, 10);
       const avatar = fetchRandomAvatar();
       await UserModel.createUser(username, hashedPassword, avatar);
-      res.redirect('/');
+      res.redirect('/login');
     } catch (error) {
       console.log(error.message);
       return console.log(error.message);
@@ -49,11 +58,9 @@ export default {
         next();
       } else {
         res.redirect('/');
-        next();
       }
     } catch (error) {
       res.redirect('/');
-      next();
     }
   },
 };

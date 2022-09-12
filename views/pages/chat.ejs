@@ -38,9 +38,7 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-
-    const socket = io();
-
+    const socket = io("http://localhost:3000");
     const dom = {
       messageInput: document.querySelector(".input"),
       inputAvatar: document.querySelector(".chat-form-container .avatar"),
@@ -50,7 +48,6 @@
       dashboardList: document.querySelector(".dashboard-list"),
       feedback: document.querySelector(".feedback"),
     };
-
     const addMessage = ({ senderID, content, createdAt }, user) => {
       const [{ username, avatar }] = user;
 
@@ -73,18 +70,22 @@
       const xHeight = dom.feed.scrollHeight;
       dom.feed.scrollTo(0, xHeight);
     };
-    const updateUsersDashboard = (user) => {
-      dom.dashboardList.innerHTML = "";
-      const dashboardMessage = document.createElement("li");
-      const avatar = `<span class="avatar" style="background: url(${user.avatar}); background-size: contain;"></span>`;
+    const updateUsersDashboard = (currentUsers) => {
+      for (user of currentUsers) {
+        console.log(user)
+        dom.dashboardList.innerHTML = "";
+        const dashboardMessage = document.createElement("li");
+        const avatar = `<span class="avatar" style="background: url(${user.avatar}); background-size: contain;"></span>`;
 
-      dashboardMessage.innerHTML = `
+        dashboardMessage.innerHTML = `
         <div class="dashboard-list-message-text">
          ${avatar}
          ${user.username}
         </div>
     `;
-      dom.dashboardList.appendChild(dashboardMessage);
+        dom.dashboardList.appendChild(dashboardMessage);
+      }
+
     };
 
     dom.sendButton.onclick = (e) => {
@@ -104,9 +105,8 @@
       addMessage(newMessage, user);
     });
 
-    socket.on("new user joined", (currentUser) => {
-      console.log(currentUser)
-      updateUsersDashboard(currentUser);
+    socket.on("new user joined", (currentUsers) => {
+      updateUsersDashboard(currentUsers);
     });
     socket.on("user has left", (updatedUsers) => {
       updateUsersDashboard(updatedUsers);
