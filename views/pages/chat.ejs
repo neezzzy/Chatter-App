@@ -12,12 +12,10 @@
     <div class="dashboard-container">
       <h3>Active Users:</h3>
       <ul class="dashboard-list">
-
       </ul>
     </div>
     <div class="chat">
       <ul class="feed">
-
       </ul>
       <div>
         <form class="chat-form-container d-flex " action="#">
@@ -38,7 +36,7 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io("http://localhost:3000");
+    const socket = io();
     const dom = {
       messageInput: document.querySelector(".input"),
       inputAvatar: document.querySelector(".chat-form-container .avatar"),
@@ -85,9 +83,7 @@
     `;
         dom.dashboardList.appendChild(dashboardMessage);
       }
-
     };
-
     dom.sendButton.onclick = (e) => {
       e.preventDefault();
       const message = dom.messageInput.value;
@@ -100,20 +96,26 @@
         dom.messageInput.focus();
       }
     };
-    socket.on("message", ({ newMessage, user }) => {
-      dom.feedback.innerHTML = "";
-      addMessage(newMessage, user);
-    });
+
+    // socket.on("message", ({ newMessage, user }) => {
+    //   dom.feedback.innerHTML = "";
+    //   addMessage(newMessage, user);
+    // });
 
     socket.on("new user joined", (currentUsers) => {
       updateUsersDashboard(currentUsers);
     });
+
     socket.on("user has left", (updatedUsers) => {
       updateUsersDashboard(updatedUsers);
     });
 
     dom.messageInput.addEventListener("keypress", () => {
       socket.emit("user typing", socket.id);
+    });
+
+    socket.on('message', function (data) {
+      console.log('Incoming message:', data);
     });
 
     socket.on("user typing", (username) => {

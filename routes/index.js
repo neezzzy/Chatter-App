@@ -1,15 +1,10 @@
 import express from 'express';
 const router = express.Router();
+import {isLoggedIn} from '../utils/isLoggedIn.js';
 
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/login');
-}
 
 router.get('/', isLoggedIn, (req, res) => {
-  res.render('pages/chat.ejs');
+  res.render('pages/roomchat.ejs', { username: req.user.username});
 });
 
 

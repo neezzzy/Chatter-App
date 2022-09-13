@@ -3,7 +3,7 @@ import logger from 'morgan';
 import './config/mongo.js';
 // routes
 import indexRouter from './routes/index.js';
-import loginrouter from './routes/login.js';
+import loginRouter from './routes/login.js';
 import registerRouter from './routes/registerRouter.js';
 import chatRouter from './routes/chatRouter.js';
 import { Server } from 'socket.io';
@@ -57,9 +57,9 @@ passportConfig(passport);
 
 // routes
 app.use('/', indexRouter);
-app.use('/login', loginrouter);
-app.use('/register', registerRouter);
 app.use('/chat', chatRouter);
+app.use('/login', loginRouter);
+app.use('/register', registerRouter);
 app.use('*', (req, res) => {
   return res.status(404).json({
     success: false,
@@ -68,24 +68,9 @@ app.use('*', (req, res) => {
 });
 
 const io = new Server(server, { cors: { origin: '*' } });
-io.on('connection', async function (socket) {
-  console.log('connecting');
-  // io.socketsJoin(room);
-  // onlineUsers.push({
-  //   socketId: socket.id,
-  //   userId: currentUserId,
-  // });
-  console.log(socket.id);
-  // console.log(currentUserId);
-  const currentUsers = [];
-  // io.sockets.in(room).emit('new user joined', currentUsers);
-  app.set('io', io);
-  
-  socket.on('disconnect', () => {
-    console.log('disconnect');
-    // onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-  });
-});
+app.set('socketio', io);
+
+
 
 server.listen(port);
 server.on('listening', () => {
