@@ -70,8 +70,6 @@ app.use('*', (req, res) => {
 const io = new Server(server, { cors: { origin: '*' } });
 app.set('socketio', io);
 
-
-
 server.listen(port);
 server.on('listening', () => {
   console.log(`Listening on port:: http://localhost:${port}/`);
