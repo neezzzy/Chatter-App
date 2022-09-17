@@ -48,7 +48,6 @@ I have created this project to learn more about Socket IO and Express server fun
 ### Built With
 
 * [Express.js] [https://expressjs.com/]
-* [Redis] [https://redis.io/]
 * [Passport] [https://www.passportjs.org/]
 * [Socket IO] [https://socket.io/]
 * [MongoDB] [https://www.mongodb.com/]

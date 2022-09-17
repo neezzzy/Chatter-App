@@ -1,6 +1,6 @@
 require('dotenv').config();
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 const db = require('../config/mongo');
 /**
  * Initialize Session
@@ -8,22 +8,12 @@ const db = require('../config/mongo');
  *
  */
 const init = function () {
-  if (process.env.NODE_ENV === 'production') {
-    return session({
-      secret: process.env.SECRET,
-      resave: false,
-      saveUninitialized: false,
-      unset: 'destroy',
-      store: new MongoStore({ mongooseConnection: db.Mongoose.connection }),
-    });
-  } else {
-    return session({
-      secret: process.env.SECRET,
-      resave: false,
-      unset: 'destroy',
-      saveUninitialized: true,
-    });
-  }
+  return session({
+    secret: 'foo',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.CONNECTION_URL }),
+  });
 };
 
 module.exports = init();
