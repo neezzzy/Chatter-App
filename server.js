@@ -1,76 +1,42 @@
-import express from 'express';
-import logger from 'morgan';
-import './config/mongo.js';
-// routes
-import indexRouter from './routes/index.js';
-import loginRouter from './routes/login.js';
-import registerRouter from './routes/registerRouter.js';
-import chatRouter from './routes/chatRouter.js';
-import { Server } from 'socket.io';
-import { createServer } from 'http';
-import cors from 'cors';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import passport from 'passport';
-import { default as connectMongoDBSession } from 'connect-mongodb-session';
-import path from 'path';
-import dotenv from 'dotenv';
-import session from 'express-session';
-import passportConfig from './config/passport.js';
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+require('dotenv').config();
+require('./config/mongo');
+// Chat application dependencies
+const express = require('express');
 const app = express();
+const path = require('path');
+const flash = require('connect-flash');
+
+// Chat application components
+const cors = require('cors');
+const passportConfig = require('./config/passport.js');
+const passport = require('passport');
+const logger = require('morgan');
+const routes = require('./routes/index');
+var session 	= require('./session/index');
+// Set the port number
 const port = process.env.PORT || '3000';
-
 app.set('port', port);
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-const server = createServer(app);
-const MongoDBStore = connectMongoDBSession(session);
-const store = new MongoDBStore({
-  uri: process.env.CONNECTION_URL,
-  collection: 'sessions',
-});
-
-app.use(
-  session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-  })
-);
+const ioServer = require('./socket/index')(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'html');
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.use(cors());
+app.set('view engine', 'ejs');
 
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(flash());
+app.use(logger('dev'));
+app.use(cors());
+app.use(session);
 // Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
 passportConfig(passport);
 
 // routes
-app.use('/', indexRouter);
-app.use('/chat', chatRouter);
-app.use('/login', loginRouter);
-app.use('/register', registerRouter);
-app.use('*', (req, res) => {
-  return res.status(404).json({
-    success: false,
-    message: `API endpoint doesn't exist`,
-  });
-});
+app.use('/', routes);
 
-const io = new Server(server, { cors: { origin: '*' } });
-app.set('socketio', io);
-
-server.listen(port);
-server.on('listening', () => {
-  console.log(`Listening on port:: http://localhost:${port}/`);
-});
+ioServer.listen(port);
