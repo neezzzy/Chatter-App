@@ -1,13 +1,13 @@
 require('dotenv').config();
-var redis = require('redis').createClient;
-var adapter = require('socket.io-redis');
-var Room = require('../models/room');
+const redis = require('redis').createClient;
+const adapter = require('socket.io-redis');
+const Room = require('../models/room');
 
 /**
  * Encapsulates all code for emitting and listening to socket events
  *
  */
-var ioEvents = function (io) {
+const ioEvents = function (io) {
   // Rooms namespace
   io.of('/rooms').on('connection', function (socket) {
     // Create a new room
@@ -41,7 +41,7 @@ var ioEvents = function (io) {
         if (!room) {
           // Assuming that you already checked in router that chatroom exists
           // Then, if a room doesn't exist here, return an error to inform the client-side.
-          socket.emit('updateUsersList', { error: 'Room doesnt exist.' });
+          socket.emit('updateUsersList', { error: `Room doesn't exist.` });
         } else {
           // Check if user exists in the session
           if (socket.request.session.passport == null) {
@@ -52,7 +52,7 @@ var ioEvents = function (io) {
             // Join the room channel
             socket.join(newRoom.id);
 
-            Room.getUsers(newRoom, socket, function (err, users, cuntUserInRoom) {
+            Room.getUsers(newRoom, socket, function (err, users, countUserInRoom) {
               if (err) throw err;
 
               // Return list of all user connected to the room to the current user
@@ -60,7 +60,7 @@ var ioEvents = function (io) {
 
               // Return the current user to other connecting sockets in the room
               // ONLY if the user wasn't connected already to the current room
-              if (cuntUserInRoom === 1) {
+              if (countUserInRoom === 1) {
                 socket.broadcast.to(newRoom.id).emit('updateUsersList', users[users.length - 1]);
               }
             });
@@ -78,7 +78,7 @@ var ioEvents = function (io) {
 
       // Find the room to which the socket is connected to,
       // and remove the current user + socket from this room
-      Room.removeUser(socket, function (err, room, userId, cuntUserInRoom) {
+      Room.removeUser(socket, function (err, room, userId, countUserInRoom) {
         if (err) throw err;
 
         // Leave the room channel
@@ -86,7 +86,7 @@ var ioEvents = function (io) {
 
         // Return the user id ONLY if the user was connected to the current room using one socket
         // The user id will be then used to remove the user from users list on chatroom page
-        if (cuntUserInRoom === 1) {
+        if (countUserInRoom === 1) {
           socket.broadcast.to(room.id).emit('removeUser', userId);
         }
       });
@@ -108,9 +108,9 @@ var ioEvents = function (io) {
  * Uses Redis as Adapter for Socket.io
  *
  */
-var init = function (app) {
-  var server = require('http').Server(app);
-  var io = require('socket.io')(server);
+const init = function (app) {
+  const server = require('http').Server(app);
+  const io = require('socket.io')(server);
 
   // Force Socket.io to ONLY use "websockets"; No Long Polling.
   io.set('transports', ['websocket']);

@@ -1,8 +1,16 @@
-'use strict';
+const dom = {
+  messageInput: document.querySelector('.input'),
+  inputAvatar: document.querySelector('.chat-form-container .avatar'),
+  dashboardMessage: document.querySelector('h1'),
+  feed: document.querySelector('.feed'),
+  sendButton: document.querySelector('.send-button'),
+  dashboardList: document.querySelector('.dashboard-list'),
+  feedback: document.querySelector('.feedback'),
+};
 
-var app = {
+const app = {
   rooms: function () {
-    var socket = io('/rooms', { transports: ['websocket'] });
+    const socket = io('/rooms', { transports: ['websocket'] });
 
     // When socket connects, get a list of chatrooms
     socket.on('connect', function () {
@@ -11,16 +19,16 @@ var app = {
         // Display an error message upon a user error(i.e. creating a room with an existing title)
         $('.room-create p.message').remove();
         if (room.error != null) {
-          $('.room-create').append(`<p class="message error">${room.error}</p>`);
+          $('.room-create').append(`<p>${room.error}</p>`);
         } else {
           app.helpers.updateRoomsList(room);
         }
       });
 
       // Whenever the user hits the create button, emit createRoom event.
-      $('.room-create button').on('click', function (e) {
-        var inputEle = $("input[name='title']");
-        var roomTitle = inputEle.val().trim();
+      $('.room-create-btn').on('click', function (e) {
+        const inputEle = $("input[name='title']");
+        const roomTitle = inputEle.val().trim();
         if (roomTitle !== '') {
           socket.emit('createRoom', roomTitle);
           inputEle.val('');
@@ -30,7 +38,7 @@ var app = {
   },
 
   chat: function (roomId, username) {
-    var socket = io('/chatroom', { transports: ['websocket'] });
+    const socket = io('/chatroom', { transports: ['websocket'] });
 
     // When socket connects, join the current chatroom
     socket.on('connect', function () {
@@ -47,24 +55,25 @@ var app = {
       });
 
       // Whenever the user hits the save button, emit newMessage event.
-      $('.chat-message button').on('click', function (e) {
-        var textareaEle = $("textarea[name='message']");
-        var messageContent = textareaEle.val().trim();
+      $('.send-button').on('click', function (e) {
+        const inputEle = $("input[name='message']");
+        const messageContent = inputEle.val().trim();
         if (messageContent !== '') {
-          var message = {
+          const message = {
             content: messageContent,
             username: username,
             date: Date.now(),
           };
 
           socket.emit('newMessage', roomId, message);
-          textareaEle.val('');
-          app.helpers.addMessage(message);
+          inputEle.val('');
+          app.helpers.addMessage(message, socket.id);
         }
       });
 
       // Whenever a user leaves the current room, remove the user from users list
       socket.on('removeUser', function (userId) {
+        console.log('removing user')
         $('li#user-' + userId).remove();
         app.helpers.updateNumOfUsers();
       });
@@ -85,17 +94,15 @@ var app = {
     updateRoomsList: function (room) {
       room.title = this.encodeHTML(room.title);
       room.title = room.title.length > 25 ? room.title.substr(0, 25) + '...' : room.title;
-      var html = `<a href="/chat/${room._id.trim()}"><li class="room-item">${room.title}</li></a>`;
+      const listItem = `<a class="list-group-item list-group-item-action border" href="/chat/${room._id.trim()}">${
+        room.title
+      }</a>`;
 
-      if (html === '') {
+      if (listItem === '') {
         return;
       }
 
-      if ($('.room-list ul li').length > 0) {
-        $('.room-list ul').prepend(html);
-      } else {
-        $('.room-list ul').html('').html(html);
-      }
+      $('.room-list').prepend(listItem);
 
       this.updateNumOfRooms();
     },
@@ -106,14 +113,13 @@ var app = {
         users = [users];
       }
 
-      var html = '';
-      for (var user of users) {
+      let html = '';
+      for (const user of users) {
         user.username = this.encodeHTML(user.username);
-        html += `<li class="clearfix" id="user-${user._id}">
-                     <img src="${user.avatar}" alt="${user.username}" />
+        html += `<li id="user-${user._id}">
+                     <img class="avatar" src="${user.avatar}" alt="${user.username}" />
                      <div class="about">
                         <div class="name">${user.username}</div>
-                        <div class="status"><i class="fa fa-circle online"></i> online</div>
                      </div></li>`;
       }
 
@@ -131,35 +137,42 @@ var app = {
     },
 
     // Adding a new message to chat history
-    addMessage: function (message) {
+    addMessage: function (message, socketId) {
       message.date = new Date(message.date).toLocaleString();
       message.username = this.encodeHTML(message.username);
       message.content = this.encodeHTML(message.content);
 
-      var html = `<li>
-                    <div class="message-data">
-                      <span class="message-data-name">${message.username}</span>
-                      <span class="message-data-time">${message.date}</span>
-                    </div>
-                    <div class="message my-message" dir="auto">${message.content}</div>
-                  </li>`;
-      $(html).hide().appendTo('.chat-history ul').slideDown(200);
+      const messageEntry = document.createElement('li');
 
-      // Keep scroll bar down
-      $('.chat-history').animate({ scrollTop: $('.chat-history')[0].scrollHeight }, 1000);
+      const you = socketId === socket.id ? true : false;
+
+      messageEntry.classList = `${you ? ' message-display-left' : 'message-display-right'}`;
+
+      messageEntry.innerHTML = `
+      <div class="message-body">
+          <span class="user-name">${message.username}</span>
+          <time>@ ${message.date}</time>
+          <p>${message.content}</p>
+      </div>
+  `;
+
+      dom.feed.appendChild(messageEntry);
+      // scroll to the bottom of all chat messages
+      const xHeight = dom.feed.scrollHeight;
+      dom.feed.scrollTo(0, xHeight);
     },
 
     // Update number of rooms
     // This method MUST be called after adding a new room
     updateNumOfRooms: function () {
-      var num = $('.room-list ul li').length;
+      const num = $('.room-list ul li').length;
       $('.room-num-rooms').text(num + ' Room(s)');
     },
 
     // Update number of online users in the current room
     // This method MUST be called after adding, or removing list element(s)
     updateNumOfUsers: function () {
-      var num = $('.users-list ul li').length;
+      const num = $('.users-list ul li').length;
       $('.chat-num-users').text(num + ' User(s)');
     },
   },
