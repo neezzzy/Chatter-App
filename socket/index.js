@@ -1,6 +1,4 @@
 require('dotenv').config();
-const redis = require('redis').createClient;
-const adapter = require('socket.io-redis');
 const Room = require('../models/room');
 
 /**
@@ -97,7 +95,6 @@ const ioEvents = function (io) {
       // No need to emit 'addMessage' to the current socket
       // As the new message will be added manually in 'main.js' file
       // socket.emit('addMessage', message);
-
       socket.broadcast.to(roomId).emit('addMessage', message);
     });
   });
@@ -111,23 +108,14 @@ const ioEvents = function (io) {
 const init = function (app) {
   const server = require('http').Server(app);
   const io = require('socket.io')(server);
-
   // Force Socket.io to ONLY use "websockets"; No Long Polling.
   io.set('transports', ['websocket']);
-
-  // Using Redis
-  let port = process.env.REDDIS_PORT;
-  let host = process.env.REDDIS_HOST;
-  let password = '';
-  let pubClient = redis(port, host, { auth_pass: password });
-  let subClient = redis(port, host, { auth_pass: password, return_buffers: true });
-  io.adapter(adapter({ pubClient, subClient }));
 
   // Allow sockets to access session data
   io.use((socket, next) => {
     require('../session')(socket.request, {}, next);
   });
-
+  
   // Define all Events
   ioEvents(io);
 

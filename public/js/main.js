@@ -73,7 +73,6 @@ const app = {
 
       // Whenever a user leaves the current room, remove the user from users list
       socket.on('removeUser', function (userId) {
-        console.log('removing user')
         $('li#user-' + userId).remove();
         app.helpers.updateNumOfUsers();
       });
@@ -144,9 +143,8 @@ const app = {
 
       const messageEntry = document.createElement('li');
 
-      const you = socketId === socket.id ? true : false;
-
-      messageEntry.classList = `${you ? ' message-display-left' : 'message-display-right'}`;
+      // const you = socketId === socket.id ? true : false;
+      // messageEntry.classList = `${you ? ' message-display-left' : 'message-display-right'}`;
 
       messageEntry.innerHTML = `
       <div class="message-body">
